@@ -1,2 +1,2 @@
 # Sudoku Visualizer
-## Using Backtracking
+### Using Backtracking
