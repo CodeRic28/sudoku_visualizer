@@ -1,7 +1,7 @@
 import math
+from generator import generate_board
 import random
-# def valid(bo,num,pos):
-
+import copy
 
 def print_board(bo):
 	for i in range(len(bo)):
@@ -64,27 +64,14 @@ def solveSudoku(bo,row,col,n):
 	return False
 
 
-def generate_board(new_board):
-	# Generate the number of cells to delete
-	delete_cells = random.randint(30,60)
-	for i in range(delete_cells):
-		x = random.randint(0,8)
-		y = random.randint(0,8)
-		new_board[x][y] = 0
-	return new_board
-
-# def generate_board(board):
-#     add_cells = random.randint(50,70)
-#     for i in range(add_cells):
-#         insert = random.randint(1,9)
-#         x = random.randint(0,8)
-#         y = random.randint(0,8)
-#         if(canPlace(board,insert,x,y,9)):
-#             board[x][y] = insert
-#         # else:
-#         #     board[x][y] = 0
-#         #     return False
-#     return board
+# def generate_board(new_board):
+# 	# Generate the number of cells to delete
+# 	delete_cells = random.randint(30,60)
+# 	for i in range(delete_cells):
+# 		x = random.randint(0,8)
+# 		y = random.randint(0,8)
+# 		new_board[x][y] = 0
+# 	return new_board
 
 board = [
 	[7,8,0,4,0,0,1,2,0],
@@ -98,21 +85,24 @@ board = [
 	[0,4,9,2,0,6,0,0,7]
 ]
 
-# new_board = [
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0],
-# 	[0,0,0,0,0,0,0,0,0]
-# ]
+new_board = [
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0]
+]
 
 
-solved = solveSudoku(board,0,0,9)
-unsolved = generate_board(solved)
-print_board(unsolved)
+# solved = solveSudoku(board,0,0,9)
+# unsolved = generate_board(solved)
+# print_board(unsolved)
+
+# print_board(solveSudoku(unsolved,0,0,9))
+
 
 
