@@ -1,26 +1,22 @@
 import math
+import random
 # def valid(bo,num,pos):
 
 
 def print_board(bo):
 	for i in range(len(bo)):
 		if i!=0 and i%3==0:
-			print("- - - - - - - - ")
+			print("- - - - - - - - - - - - ")
 		for j in range(len(bo[0])):
 			if j%3 == 0 and j!=0:
 				print(" | ",end="")
-				
+
 			if j==8:
 				print(bo[i][j])
 			else:
 				print(str(bo[i][j]) + " ",end="")
 
-# def find_empty(bo):
-# 	for i in range(bo):
-# 		for j in range(bo[0]):
-# 			if bo[i][j] == 0:
-# 				return (i,j) # return (row,col)
-
+	# return bo
 
 
 def canPlace(bo,number,row,col,n):
@@ -45,15 +41,15 @@ def canPlace(bo,number,row,col,n):
 def solveSudoku(bo,row,col,n):
 	# base case
 	if row == n:
-		print_board(bo)
-		return True
+		# print_board(bo)
+		# return True
+		solved = [row[:] for row in bo]
+		return solved
 
 	if(col == n):
 		return solveSudoku(bo,row+1,0,n)
 	if bo[row][col] != 0:
 		return solveSudoku(bo,row,col+1,n)
-
-
 
 	for number in range(1,n+1):
 		if(canPlace(bo,number,row,col,n)):
@@ -61,11 +57,34 @@ def solveSudoku(bo,row,col,n):
 			check = solveSudoku(bo,row,col+1,n)
 
 			if(check):
-				return True
+				return check
 
 	# Backtrack
 	bo[row][col] = 0
 	return False
+
+
+def generate_board(new_board):
+	# Generate the number of cells to delete
+	delete_cells = random.randint(30,60)
+	for i in range(delete_cells):
+		x = random.randint(0,8)
+		y = random.randint(0,8)
+		new_board[x][y] = 0
+	return new_board
+
+# def generate_board(board):
+#     add_cells = random.randint(50,70)
+#     for i in range(add_cells):
+#         insert = random.randint(1,9)
+#         x = random.randint(0,8)
+#         y = random.randint(0,8)
+#         if(canPlace(board,insert,x,y,9)):
+#             board[x][y] = insert
+#         # else:
+#         #     board[x][y] = 0
+#         #     return False
+#     return board
 
 board = [
 	[7,8,0,4,0,0,1,2,0],
@@ -79,6 +98,21 @@ board = [
 	[0,4,9,2,0,6,0,0,7]
 ]
 
+# new_board = [
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0],
+# 	[0,0,0,0,0,0,0,0,0]
+# ]
 
-solveSudoku(board,0,0,9)
+
+solved = solveSudoku(board,0,0,9)
+unsolved = generate_board(solved)
+print_board(unsolved)
+
 
