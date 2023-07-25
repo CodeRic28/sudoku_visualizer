@@ -1,8 +1,68 @@
 import pygame
 from sys import exit
 from generator import generate_board
-from solver import *
+from solver import print_board,solveit
 import copy
+import math
+
+#solver
+def canPlace(bo,number,row,col,n):
+    # check row and col
+    for i in range(n):
+        if(bo[row][i]==number or bo[i][col]==number):
+            return False
+
+    # check subgrid
+    rn = int(math.sqrt(n))
+    sx = (row // rn) * rn
+    sy = (col // rn) * rn
+
+    for x in range(int(sx), int(sx+rn)):
+        for y in range(int(sy), int(sy+rn)):
+            if(bo[x][y] == number):
+                return False
+
+    return True
+
+def solveSudoku(bo,row,col,n):
+    # base case
+    if row == n:
+        if 0 not in bo[n-1]:
+            print(row," ", col)
+            print("BASE CASE TRIGGERED")
+            return 5
+        return True
+    if(col == n):
+        if solveSudoku(bo,row+1,0,n) == 5:
+            pygame.time.delay(1000)
+            exit()
+            # for event in pygame.event.get():
+            #
+            #     if event.type == pygame.K_RETURN:
+            #         pygame.quit()
+            #         exit()
+
+
+        return solveSudoku(bo,row+1,0,n)
+    if bo[row][col] != 0:
+        return solveSudoku(bo,row,col+1,n)
+
+    for number in range(1,n+1):
+        if(canPlace(bo,number,row,col,n)):
+            bo[row][col] = number
+            auto_insert(screen, (row, col), number)
+            check = solveSudoku(bo,row,col+1,n)
+            auto_backtrack(screen, (row, col))
+            if(check):
+                return True
+    # Backtrack
+    bo[row][col] = 0
+    # remove from guiboard
+    auto_backtrack(screen, (row, col))
+    return False
+
+
+
 
 ### CONSTANTS
 WIDTH  = 800
@@ -12,7 +72,7 @@ LINE_THICKNESS = 2
 cell_x,cell_y =0,0
 BUFFER = 5
 
-sudoku_board = [
+board = [
         [7, 8, 0, 4, 0, 0, 1, 2, 0],
         [6, 0, 0, 0, 7, 5, 0, 0, 9],
         [0, 0, 0, 6, 0, 1, 0, 7, 8],
@@ -23,11 +83,11 @@ sudoku_board = [
         [1, 2, 0, 0, 0, 7, 4, 0, 0],
         [0, 4, 9, 2, 0, 6, 0, 0, 7]
     ]
-unsolved = generate_board(sudoku_board)
-gui_board = copy.deepcopy(unsolved)
-# pygame.init()
-# screen = pygame.display.set_mode((WIDTH,HEIGHT))
+solved = solveit(board,0,0,9)
+unsolved = generate_board(solved)
 
+gui_board = copy.deepcopy(unsolved)
+# print_board(solveit(unsolved,0,0,9))
 
 class Button:
     def __init__(self,text,width,height,pos,elevation):
@@ -65,6 +125,9 @@ class Button:
     def check_click(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.top_rect.collidepoint(mouse_pos):
+
+            clock.tick(60)
+            pygame.display.update()
             self.top_color = '#D74B4B'
             if pygame.mouse.get_pressed()[0]: # Returns a 3-tuple of mouse buttons ([left-click],middle-click,right-click)
                 self.top_color = (65, 157, 123)
@@ -72,9 +135,11 @@ class Button:
                 self.pressed = True
             else:
                 self.dynamic_elevation = self.elevation
-                if(self.pressed == True):
+                if self.pressed == True:
                     # AUTO SOLVE CODE TO BE EXECUTED
-                    print('clicked')
+                    solveSudoku(gui_board,0,0,9) # solveSudoku(bo,row,col,n,gui_board):
+                    print_board(gui_board)
+                    # unsolved = generate_board(gui_board)
                     self.pressed = False
 
         else:
@@ -86,30 +151,26 @@ class Button:
 pygame.init()
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 gui_font = pygame.font.Font(None, 30)
+clock = pygame.time.Clock()
 
 
-
-
-def insert(screen, position):
-    print(position[0],position[1])
+def auto_insert(screen, position,number):
     i, j = position[0], position[1]
 
     base_font = pygame.font.Font(None, 50)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.unicode.isdigit() and 1 <= event.unicode <= '9':
-                value = event.key - 48
-                text_surface = base_font.render(str(value), True, (0, 0, 0))
-                text_rect = text_surface.get_rect(center=(int(i),int(j)))
-                screen.blit(text_surface, (i,j))
-                pygame.display.update()
-
+    text_surface = base_font.render(str(number), True, (153, 102, 204))
+    text_rect = text_surface.get_rect(center=(72 + j * 72 + 36, 72 + i * 72 + 36))
+    screen.blit(text_surface, text_rect)
+    clock.tick(60)
     pygame.display.update()
 
+
+def auto_backtrack(screen,position):
+    i, j = position[0], position[1]
+    erase_rect = pygame.Rect((72 + j * 72 +3, 72 + i * 72 + 3), (67, 67))
+    pygame.draw.rect(screen, BG_COLOR, erase_rect)
+    clock.tick(60)
+    pygame.display.update()
 
 def board():
 
@@ -125,13 +186,6 @@ def board():
     # Button to automatic solve
     # Instance of Button class
     auto_solve_btn = Button('Solve it!', 72 * 2, 36, (72, 20), 6)
-    # btn_inner_text = "Solve it!"
-    # top_rect_btn = pygame.Rect((72, 25), (72 * 2, 36))
-    # bottom_rect_btn = pygame.Rect((72, 30), (72 * 2, 36))
-    # pygame.draw.rect(screen, (0, 0, 0), bottom_rect_btn, border_radius=5)
-    # pygame.draw.rect(screen, (123, 231, 12), top_rect_btn, border_radius=5)
-    # inner_text_surface = medium_font.render(btn_inner_text, True, (0, 0, 0))
-    # screen.blit(inner_text_surface, (72 + BUFFER + 10, 25 + BUFFER))
 
     # Populating the grid
     for row in range(9):
@@ -152,19 +206,9 @@ def board():
                 # insert(screen, (mouse_x//72 -1, mouse_y//72 - 1))
                 x,y = mouse_x//72 -1, mouse_y//72 - 1
                 cell_x,cell_y = x,y
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     mouse_x,mouse_y = pygame.mouse.get_pos()
-            #     # If mouse clicks on button
-            #     x, y = mouse_x // 72 - 1, mouse_y // 72 - 1
-            #     if (x == 0 and y == -1) or (x == 1 and y == -1):
-            #         top_rect_btn = pygame.Rect((72, 30), (72 * 2, 36))
-            #         pygame.draw.rect(screen, (123, 231, 12), top_rect_btn, border_radius=5)
-            #         screen.blit(inner_text_surface, (72 + BUFFER + 10, 30 + BUFFER))
-
-
             elif event.type == pygame.KEYDOWN:
                 if event.key == 48 or event.key == pygame.K_BACKSPACE:
-                    erase_rect = pygame.Rect((72 + cell_x * 72, 35+ cell_y * 72 + 36), (72, 72))
+                    erase_rect = pygame.Rect((72 + cell_x * 72 +3, 35+ cell_y * 72 + 36 + 5), (67, 67))
                     pygame.draw.rect(screen, BG_COLOR, erase_rect)
                     gui_board[y][x] = 0
                     pygame.display.update()
@@ -198,7 +242,8 @@ def board():
             pygame.draw.line(screen, (0, 0, 0), (72 + 72 * i, 72), (72 + 72 * i, 720), LINE_THICKNESS)
             pygame.draw.line(screen, (0, 0, 0), (72, 72 + 72 * i), (720, 72 + 72 * i), LINE_THICKNESS)
 
-
+        clock.tick(10)
         pygame.display.update()
+
 
 board()
